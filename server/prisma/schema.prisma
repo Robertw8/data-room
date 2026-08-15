@@ -1,13 +1,120 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum ShareType {
+  PUBLIC
+  USER
+}
+
+enum ShareRole {
+  VIEWER
+  EDITOR
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  passwordHash String
+
+  dataRooms DataRoom[]
+  shares Share[] @relation("ShareRecipient")
+  createdShared Share[] @relation("ShareCreator")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DataRoom {
+  id String @id @default(uuid())
+  name String
+
+  ownerId String
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  folders Folder[]
+  files File[]
+  shares Share[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model Folder {
+  id String @id @default(uuid())
+  name String
+
+  dataRoomId String
+  dataRoom DataRoom @relation(fields: [dataRoomId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent Folder? @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Folder[] @relation("FolderTree")
+
+  files File[]
+  shares Share[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dataRoomId, parentId])
+}
+
+model File {
+  id String @id @default(uuid())
+  name String
+  storageKey String @unique
+  mimeType String
+  size Int
+
+  dataRoomId String
+  dataRoom DataRoom @relation(fields: [dataRoomId], references: [id], onDelete: Cascade)
+
+  folderId String?
+  folder Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  shares Share[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dataRoomId, folderId])
+}
+
+model Share {
+  id String @id @default(uuid())
+  token String @unique
+  type ShareType
+  role ShareRole @default(VIEWER)
+
+  createdById String
+  createdBy User @relation("ShareCreator", fields: [createdById], references: [id])
+
+  recipientUserId String?
+  recipientUser User? @relation("ShareRecipient", fields: [recipientUserId], references: [id])
+
+  dataRoomId String?
+  dataRoom DataRoom? @relation(fields: [dataRoomId], references: [id], onDelete: Cascade)
+
+  folderId String?
+  folder Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  fileId String?
+  file File? @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([recipientUserId])
+  @@index([dataRoomId])
+  @@index([folderId])
+  @@index([fileId])
 }
