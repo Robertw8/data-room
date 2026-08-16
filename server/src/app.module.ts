@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { PrismaModule } from 'prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { DataRoomsModule } from './data-rooms/data-rooms.module';
+import { FoldersModule } from './folders/folders.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { DataRoomsModule } from './data-rooms/data-rooms.module';
     PrismaModule,
     AuthModule,
     DataRoomsModule,
+    FoldersModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

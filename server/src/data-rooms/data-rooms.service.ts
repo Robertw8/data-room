@@ -46,4 +46,12 @@ export class DataRoomsService {
 
     return this.prisma.dataRoom.delete({ where: { id: targetRoom.id } });
   }
+
+  async findRoomFolders(ownerId: string, roomId: string) {
+    const targetRoom = await this.findOne(ownerId, roomId);
+
+    return this.prisma.folder.findMany({
+      where: { dataRoomId: targetRoom.id, parentId: null },
+    });
+  }
 }

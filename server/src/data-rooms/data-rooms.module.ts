@@ -7,5 +7,6 @@ import { PrismaModule } from 'prisma/prisma.module';
   providers: [DataRoomsService],
   controllers: [DataRoomsController],
   imports: [PrismaModule],
+  exports: [DataRoomsService],
 })
 export class DataRoomsModule {}
