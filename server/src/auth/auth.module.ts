@@ -9,6 +9,7 @@ import { AuthGuard } from './guards/auth.guard';
 @Module({
   controllers: [AuthController],
   providers: [AuthService, AuthGuard],
+  exports: [AuthGuard],
   imports: [
     PrismaModule,
     JwtModule.registerAsync({

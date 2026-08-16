@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { FoldersService } from './folders.service';
 import { FoldersController } from './folders.controller';
-import { DataRoomsService } from 'src/data-rooms/data-rooms.service';
 import { PrismaModule } from 'prisma/prisma.module';
+import { DataRoomsModule } from 'src/data-rooms/data-rooms.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  providers: [FoldersService, DataRoomsService],
+  providers: [FoldersService],
   controllers: [FoldersController],
-  imports: [PrismaModule],
+  imports: [PrismaModule, DataRoomsModule, AuthModule],
+  exports: [FoldersService],
 })
 export class FoldersModule {}
