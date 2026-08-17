@@ -48,7 +48,7 @@ The Prisma schema contains five models:
 
 Data Room and folder deletion use database cascades for dependent metadata, including Shares attached to a deleted target.
 
-The nullable Share target columns allow the three target types in one table. The create service writes exactly one of `dataRoomId`, `folderId`, or `fileId`; there is currently no database `CHECK` constraint enforcing that rule for writes outside the service.
+The nullable Share target columns allow the three target types in one table. The create service writes exactly one of `dataRoomId`, `folderId`, or `fileId`, and a database `CHECK` constraint enforces that invariant for every write.
 
 ## Folder hierarchy
 
@@ -102,7 +102,7 @@ sequenceDiagram
     Files-->>UI: File record
 ```
 
-The URL request only permits `application/pdf`. Completion also requires the storage key to have the expected Data Room prefix, verifies that the object exists, checks S3's actual `Content-Type`, rejects a zero-length object, and rejects reuse of an already completed key. The database row is not created until those checks pass.
+The URL request only permits `application/pdf` files up to 50 MB. Completion also requires the storage key to have the expected Data Room prefix, verifies that the object exists, checks S3's actual `Content-Type` and `Content-Length`, rejects an empty or oversized object, and rejects reuse of an already completed key. The database row is not created until those checks pass.
 
 Important failure cases:
 
@@ -163,7 +163,7 @@ This ordering is not atomic. A batch may delete some objects before returning er
 
 All current shares are created with the `VIEWER` role. The schema also defines `EDITOR` as a future extension point, but no shared write controller or service path exists. A creator may revoke only their own active share; revocation sets `revokedAt` instead of deleting the row. Created/received listings and token resolution include only active shares.
 
-Each service-created Share targets exactly one resource:
+Service validation and a PostgreSQL `CHECK` constraint require each Share to target exactly one resource:
 
 - **Data Room:** the root response lists root folders and files, and folder/file reads are allowed anywhere in that room.
 - **Folder:** the root is presented as the share root. Folder path resolution must include the shared folder, so ancestors and sibling branches remain inaccessible.
@@ -182,10 +182,11 @@ The application checks names before writes so users receive a specific conflict 
 | Root Folder   | Data Room root                   | Partial unique `(dataRoomId, name) WHERE parentId IS NULL`               |
 | Nested File   | One folder within one Data Room  | Partial unique `(dataRoomId, folderId, name) WHERE folderId IS NOT NULL` |
 | Root File     | Data Room root                   | Partial unique `(dataRoomId, name) WHERE folderId IS NULL`               |
+| Share         | One target per share             | Check exactly one of `dataRoomId`, `folderId`, or `fileId` is non-null   |
 
 The separate root indexes are essential: a regular PostgreSQL unique index permits multiple rows when a component is `NULL`. Same-named folders or files remain valid in different parents and different Data Rooms. File moves and all relevant rename/create paths use the same conflict handling. `File.storageKey` also has an independent unique constraint.
 
-Foreign keys maintain ownership topology and apply cascades for target deletion. The schema does not currently add a `CHECK` constraint for Share target exclusivity or for PUBLIC/USER recipient combinations; the share creation service enforces those rules.
+Foreign keys maintain ownership topology and apply cascades for target deletion. The database enforces Share target exclusivity, while the share creation service also validates target and PUBLIC/USER recipient rules.
 
 ## Frontend server state
 

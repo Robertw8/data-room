@@ -84,6 +84,12 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1",
+      "^src/(.*)$": "<rootDir>/$1",
+      "^prisma/(.*)$": "<rootDir>/../prisma/$1",
+      "^middleware/(.*)$": "<rootDir>/../middleware/$1"
+    }
   }
 }

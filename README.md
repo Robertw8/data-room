@@ -62,7 +62,7 @@ A prepared read-only Folder share can be opened without signing in:
 
 ### Files
 
-- PDF-only uploads
+- PDF-only uploads up to 50 MB
 - Multi-file drag-and-drop with independent progress and errors per file
 - Retry for an individual failed upload
 - In-app PDF viewer with an option to open the file in a new tab
@@ -136,11 +136,11 @@ sequenceDiagram
     API-->>Browser: Completed file
 ```
 
-The API authorizes the destination and returns a five-minute presigned PUT for a generated key. The browser uploads with plain Axios, so the application Bearer token is never sent to S3. Completion rechecks access and uses S3 `HEAD` to verify a non-empty PDF before persisting metadata. The immutable `storageKey` is independent of the display name, so logical rename and move operations remain database-only. [Architecture details](./docs/architecture.md#upload-sequence)
+The API authorizes the destination and returns a five-minute presigned PUT for a generated key. The browser uploads with plain Axios, so the application Bearer token is never sent to S3. Completion rechecks access and uses S3 `HEAD` to verify a non-empty PDF no larger than 50 MB before persisting metadata. The immutable `storageKey` is independent of the display name, so logical rename and move operations remain database-only. [Architecture details](./docs/architecture.md#upload-sequence)
 
 ## Sharing and access control
 
-Each `Share` records a unique token, `PUBLIC` or `USER` type, role, creator, optional recipient, revocation state, and one service-enforced Data Room, Folder, or File target. The schema includes `VIEWER` and `EDITOR`, but the current service creates only read-only `VIEWER` shares.
+Each `Share` records a unique token, `PUBLIC` or `USER` type, role, creator, optional recipient, revocation state, and exactly one Data Room, Folder, or File target. The service validates that target and a PostgreSQL `CHECK` constraint enforces it for every write. The schema includes `VIEWER` and `EDITOR`, but the current service creates only read-only `VIEWER` shares.
 
 - **PUBLIC:** anyone holding the active token can use the unguarded `/public/shares/:token` read paths.
 - **USER:** the guarded `/shares/:token` read paths require both a valid JWT and a token assigned to that authenticated recipient.
@@ -210,8 +210,9 @@ Important database invariants:
 - `(ownerId, name)` is unique for Data Rooms.
 - Folder and file names are unique among siblings. Separate partial indexes cover nested and root rows because their parent/folder IDs are nullable.
 - `storageKey` is globally unique and remains independent of the user-visible filename.
+- A Share has exactly one non-null Data Room, Folder, or File target.
 
-Friendly service checks are backed by database uniqueness for concurrency races. Share target exclusivity is enforced by the create service rather than a database check constraint. [Invariant details](./docs/architecture.md#database-invariants)
+Friendly service checks are backed by database constraints for concurrency races and writes outside the normal service path. [Invariant details](./docs/architecture.md#database-invariants)
 
 ## Key design decisions
 
@@ -322,12 +323,14 @@ npm run dev
 
 ## Verification
 
+`GET /health` returns the API status and an ISO timestamp for deployment checks.
+
 The repository exposes these quality gates:
 
 ```bash
 # Backend
 cd server
-npm test          # current scope: 2 suites / 2 tests
+npm test          # current scope: 4 suites / 6 tests
 npm run lint
 npm run build
 

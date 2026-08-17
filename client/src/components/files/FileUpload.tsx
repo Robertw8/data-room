@@ -30,6 +30,8 @@ interface FileUploadProps {
   userId: string;
 }
 
+const MAX_PDF_SIZE_BYTES = 50 * 1024 * 1024;
+
 const statusLabels: Record<UploadStatus, string> = {
   pending: "Pending",
   uploading: "Uploading",
@@ -94,20 +96,40 @@ const FileUpload = ({ dataRoomId, folderId, userId }: FileUploadProps) => {
   const addFiles = (selectedFiles: File[]) => {
     setSelectionError(null);
 
-    const pdfFiles = selectedFiles.filter(
-      (file) => file.type === "application/pdf",
+    const validPdfFiles = selectedFiles.filter(
+      (file) =>
+        file.type === "application/pdf" && file.size <= MAX_PDF_SIZE_BYTES,
     );
-    const rejectedCount = selectedFiles.length - pdfFiles.length;
+    const pdfTypeCount = selectedFiles.filter(
+      (file) => file.type === "application/pdf",
+    ).length;
+    const rejectedTypeCount = selectedFiles.length - pdfTypeCount;
+    const oversizedCount = selectedFiles.filter(
+      (file) =>
+        file.type === "application/pdf" && file.size > MAX_PDF_SIZE_BYTES,
+    ).length;
 
-    if (rejectedCount > 0) {
-      setSelectionError(
-        rejectedCount === 1
+    const errors: string[] = [];
+
+    if (rejectedTypeCount > 0) {
+      errors.push(
+        rejectedTypeCount === 1
           ? "One file was skipped. Only PDF files are allowed."
-          : `${rejectedCount} files were skipped. Only PDF files are allowed.`,
+          : `${rejectedTypeCount} files were skipped. Only PDF files are allowed.`,
       );
     }
 
-    const newUploads: UploadItem[] = pdfFiles.map((file) => ({
+    if (oversizedCount > 0) {
+      errors.push(
+        oversizedCount === 1
+          ? "One PDF was skipped. Files must be 50 MB or smaller."
+          : `${oversizedCount} PDFs were skipped. Files must be 50 MB or smaller.`,
+      );
+    }
+
+    if (errors.length > 0) setSelectionError(errors.join(" "));
+
+    const newUploads: UploadItem[] = validPdfFiles.map((file) => ({
       id: crypto.randomUUID(),
       file,
       progress: 0,

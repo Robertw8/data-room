@@ -14,6 +14,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { MoveFileDto } from './dto/move-file.dto';
 import { Prisma } from 'src/generated/prisma/client';
+import { MAX_PDF_SIZE_BYTES } from './files.constants';
 
 @Injectable()
 export class FilesService {
@@ -204,6 +205,10 @@ export class FilesService {
 
     if (!size || size <= 0) {
       throw new BadRequestException('Uploaded file is empty.');
+    }
+
+    if (size > MAX_PDF_SIZE_BYTES) {
+      throw new BadRequestException('PDF files must be 50 MB or smaller.');
     }
 
     // Avoid complete duplicates

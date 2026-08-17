@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   Equals,
   IsInt,
@@ -6,12 +7,19 @@ import {
   IsString,
   IsUUID,
   Matches,
+  Max,
+  MaxLength,
   MinLength,
 } from 'class-validator';
+import { MAX_PDF_SIZE_BYTES } from '../files.constants';
 
 export class CreateUploadDto {
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString()
   @MinLength(1)
+  @MaxLength(255)
   @Matches(/\S/, { message: 'name must not be blank' })
   name!: string;
 
@@ -20,6 +28,9 @@ export class CreateUploadDto {
 
   @IsInt()
   @IsPositive()
+  @Max(MAX_PDF_SIZE_BYTES, {
+    message: 'PDF files must be 50 MB or smaller.',
+  })
   size!: number;
 
   @IsUUID()
