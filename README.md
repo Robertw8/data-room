@@ -258,7 +258,11 @@ The API uses Nest's standard exception responses; it does not define a custom un
 4. **Authentication has no refresh-token or rotation system.** Access tokens expire after one hour and are stored in browser local storage.
 5. **Directory responses are unpaginated.** A single directory with 100,000 children is outside the current listing design.
 6. **USER shares require an existing registered recipient.** The service resolves the supplied email immediately and does not implement invitations.
-7. **Automated coverage is intentionally small.** The current backend unit command discovers two suites with two tests; broader owner, sharing, and S3 workflows need integration and end-to-end coverage for production hardening.
+7. **Automated coverage is intentionally small.**
+   The backend test suite provides focused coverage for health checks,
+   authentication guards, Share target validation, and upload validation.
+   Broader owner, sharing, and S3 workflows would need additional integration
+   and end-to-end coverage for production hardening.
 
 ## Local setup
 
