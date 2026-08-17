@@ -16,8 +16,6 @@ Cyan Data Room is a full-stack virtual Data Room for organizing and securely sha
 
 The React frontend is deployed on Vercel. The NestJS API and PostgreSQL database are hosted on Railway, while PDF objects are stored in private AWS S3 and accessed through short-lived presigned URLs.
 
-![Cyan Data Room overview](./docs/images/data-room-overview.png)
-
 ## Quick demo
 
 | Role   | Email                   | Password       |

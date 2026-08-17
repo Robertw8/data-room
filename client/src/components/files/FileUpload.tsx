@@ -154,7 +154,7 @@ const FileUpload = ({ dataRoomId, folderId, userId }: FileUploadProps) => {
         onDragOver={(event) => event.preventDefault()}
         onDrop={handleDrop}
       >
-        <UploadCloudIcon className="size-7 text-muted-foreground" />
+        <UploadCloudIcon className="size-7 text-accent-foreground" />
         <p className="mt-2 text-sm font-medium">Drop PDF files here</p>
         <p className="mt-1 text-xs text-muted-foreground">
           Upload one or several PDFs directly to secure storage.
@@ -181,7 +181,7 @@ const FileUpload = ({ dataRoomId, folderId, userId }: FileUploadProps) => {
             <div className="rounded-lg border p-3" key={item.id}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
-                  <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />
+                  <FileTextIcon className="size-4 shrink-0 text-accent-foreground" />
                   <span className="truncate text-sm font-medium">
                     {item.file.name}
                   </span>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth, useDataRooms } from "@/hooks";
 
 import { Link } from "react-router-dom";
-import { PlusIcon } from "lucide-react";
+import { FolderLockIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CreateDataRoomDialog from "@/components/data-rooms/CreateDataRoomDialog";
 import DeleteDataRoomDialog from "@/components/data-rooms/DeleteDataRoomDialog";
@@ -141,9 +141,12 @@ const DataRoomsContent = ({
                   className="group flex-1 rounded-t-xl p-5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   to={`/data-rooms/${dataRoom.id}`}
                 >
-                  <h2 className="font-semibold group-hover:underline">
-                    {dataRoom.name}
-                  </h2>
+                  <div className="flex items-center gap-2">
+                    <FolderLockIcon className="size-4 shrink-0 text-accent-foreground" />
+                    <h2 className="font-semibold group-hover:underline">
+                      {dataRoom.name}
+                    </h2>
+                  </div>
                   <p className="mt-2 text-xs text-muted-foreground">
                     Updated {formatDate(dataRoom.updatedAt)}
                   </p>

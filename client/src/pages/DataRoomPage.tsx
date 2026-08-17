@@ -15,6 +15,7 @@ import {
   PlusIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Brand from "@/components/Brand";
 import CreateFolderDialog from "@/components/folders/CreateFolderDialog";
 import DeleteFolderDialog from "@/components/folders/DeleteFolderDialog";
 import RenameFolderDialog from "@/components/folders/RenameFolderDialog";
@@ -134,10 +135,14 @@ const FolderExplorer = ({
   return (
     <main className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Button asChild variant="ghost">
-            <Link to="/app">← Data Rooms</Link>
-          </Button>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-1 sm:gap-3">
+            <Brand compact />
+            <span className="h-6 w-px bg-border" aria-hidden="true" />
+            <Button asChild variant="ghost">
+              <Link to="/app">← Data Rooms</Link>
+            </Button>
+          </div>
           <Button variant="outline" onClick={onLogout}>
             Logout
           </Button>
@@ -235,7 +240,7 @@ const FolderExplorer = ({
 
             {folders.length === 0 && files.length === 0 ? (
               <div className="rounded-xl border border-dashed bg-card p-12 text-center">
-                <FolderIcon className="mx-auto size-8 text-muted-foreground" />
+                <FolderIcon className="mx-auto size-8 text-accent-foreground" />
                 <h2 className="mt-4 text-lg font-semibold">
                   This folder is empty
                 </h2>
@@ -264,7 +269,7 @@ const FolderExplorer = ({
                       className="flex min-w-0 items-center gap-3 rounded-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       to={`/data-rooms/${dataRoomId}/folders/${childFolder.id}`}
                     >
-                      <FolderIcon className="size-5 shrink-0 text-muted-foreground" />
+                      <FolderIcon className="size-5 shrink-0 text-accent-foreground" />
                       <span className="truncate">{childFolder.name}</span>
                     </Link>
                     <span className="hidden text-sm text-muted-foreground sm:block">
@@ -315,7 +320,7 @@ const FolderExplorer = ({
                     key={file.id}
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <FileTextIcon className="size-5 shrink-0 text-muted-foreground" />
+                      <FileTextIcon className="size-5 shrink-0 text-accent-foreground" />
                       <div className="min-w-0">
                         <p className="truncate font-medium">{file.name}</p>
                         <p className="text-xs text-muted-foreground">

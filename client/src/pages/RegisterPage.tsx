@@ -4,6 +4,7 @@ import axios from "axios";
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import Brand from "@/components/Brand";
 
 const RegisterPage = () => {
   const { isLoading, register } = useAuth();
@@ -49,12 +50,13 @@ const RegisterPage = () => {
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12">
       <section className="w-full max-w-sm rounded-xl border bg-card p-6 text-card-foreground shadow-sm">
+        <Brand className="mb-6 justify-center" />
         <div className="mb-6 space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
             Create an account
           </h1>
           <p className="text-sm text-muted-foreground">
-            Register to start using your Data Room.
+            Register to start using Cyan Data Room.
           </p>
         </div>
 
@@ -109,7 +111,7 @@ const RegisterPage = () => {
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link
-            className="font-medium text-foreground underline-offset-4 hover:underline"
+            className="font-medium text-accent-foreground underline-offset-4 hover:underline"
             to="/login"
           >
             Sign in

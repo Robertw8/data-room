@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ChevronRightIcon, FileTextIcon, FolderIcon } from "lucide-react";
 import { useSharedFileViewUrl, useSharedResource } from "@/hooks";
 import { Button } from "@/components/ui/button";
+import Brand from "@/components/Brand";
 import PdfViewerDialog from "@/components/files/PdfViewerDialog";
 
 import type { FolderFile, SharedAccessMode } from "@/types";
@@ -44,9 +45,11 @@ const SharedExplorerPage = ({ mode }: SharedExplorerPageProps) => {
     <main className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <div>
-            <p className="text-lg font-semibold">Shared resource</p>
-            <p className="text-xs text-muted-foreground">Read-only access</p>
+          <div className="min-w-0">
+            <Brand compact />
+            <p className="mt-1 pl-11 text-xs text-muted-foreground">
+              Shared resource · Read-only access
+            </p>
           </div>
           {mode === "user" && (
             <Button asChild variant="outline">
@@ -127,7 +130,7 @@ const SharedExplorerPage = ({ mode }: SharedExplorerPageProps) => {
               <section className="rounded-xl border bg-card p-6 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex min-w-0 items-center gap-3">
-                    <FileTextIcon className="size-6 shrink-0 text-muted-foreground" />
+                    <FileTextIcon className="size-6 shrink-0 text-accent-foreground" />
                     <div className="min-w-0">
                       <p className="truncate font-medium">
                         {resource.data.item.name}
@@ -194,7 +197,7 @@ const SharedDirectory = ({
   if (folders.length === 0 && files.length === 0) {
     return (
       <div className="rounded-xl border border-dashed bg-card p-12 text-center">
-        <FolderIcon className="mx-auto size-8 text-muted-foreground" />
+        <FolderIcon className="mx-auto size-8 text-accent-foreground" />
         <h2 className="mt-4 text-lg font-semibold">This folder is empty</h2>
       </div>
     );
@@ -211,7 +214,7 @@ const SharedDirectory = ({
             className="flex min-w-0 items-center gap-3 rounded-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             to={`${routeBase}/folders/${folder.id}`}
           >
-            <FolderIcon className="size-5 shrink-0 text-muted-foreground" />
+            <FolderIcon className="size-5 shrink-0 text-accent-foreground" />
             <span className="truncate">{folder.name}</span>
           </Link>
           <Button asChild size="sm" variant="ghost">
@@ -226,7 +229,7 @@ const SharedDirectory = ({
           key={file.id}
         >
           <div className="flex min-w-0 items-center gap-3">
-            <FileTextIcon className="size-5 shrink-0 text-muted-foreground" />
+            <FileTextIcon className="size-5 shrink-0 text-accent-foreground" />
             <div className="min-w-0">
               <p className="truncate font-medium">{file.name}</p>
               <p className="text-xs text-muted-foreground">
