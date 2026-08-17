@@ -1,7 +1,18 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { useAuth, useCreatedShares, useRevokeShare } from "@/hooks";
+
 import AuthenticatedHeader from "@/components/shares/AuthenticatedHeader";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import getApiErrorMessage from "@/lib/api-error";
 import type { CreatedShare, ShareTargetType } from "@/types";
@@ -72,6 +83,7 @@ const SharesCreatedContent = ({
 }: SharesCreatedContentProps) => {
   const shares = useCreatedShares(userId);
   const revokeShare = useRevokeShare(userId);
+  const [shareToRevoke, setShareToRevoke] = useState<CreatedShare | null>(null);
 
   const handleCopy = async (share: CreatedShare) => {
     try {
@@ -84,17 +96,13 @@ const SharesCreatedContent = ({
     }
   };
 
-  const handleRevoke = async (share: CreatedShare) => {
-    const confirmed = window.confirm(
-      "Revoke this share? Anyone using it will immediately lose access.",
-    );
-
-    if (!confirmed) return;
-
+  const handleRevoke = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (!shareToRevoke || revokeShare.isPending) return;
     onActionError(null);
 
     try {
-      await revokeShare.mutateAsync(share.id);
+      await revokeShare.mutateAsync(shareToRevoke.id);
     } catch (requestError) {
       onActionError(
         getApiErrorMessage(
@@ -102,6 +110,8 @@ const SharesCreatedContent = ({
           "Unable to revoke this share. Please try again.",
         ),
       );
+    } finally {
+      setShareToRevoke(null);
     }
   };
 
@@ -193,18 +203,12 @@ const SharesCreatedContent = ({
                       </Button>
                     )}
                     <Button
-                      disabled={
-                        revokeShare.isPending &&
-                        revokeShare.variables === share.id
-                      }
+                      disabled={revokeShare.isPending}
                       size="sm"
                       variant="destructive"
-                      onClick={() => void handleRevoke(share)}
+                      onClick={() => setShareToRevoke(share)}
                     >
-                      {revokeShare.isPending &&
-                      revokeShare.variables === share.id
-                        ? "Revoking…"
-                        : "Revoke"}
+                      Revoke
                     </Button>
                   </div>
                 </div>
@@ -213,6 +217,37 @@ const SharesCreatedContent = ({
           </section>
         )}
       </div>
+
+      {shareToRevoke && (
+        <AlertDialog
+          open
+          onOpenChange={(open) => {
+            if (!open && !revokeShare.isPending) setShareToRevoke(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Revoke access?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Anyone using this share will lose access.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={revokeShare.isPending}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="min-w-20 bg-destructive text-white hover:bg-destructive/90"
+                disabled={revokeShare.isPending}
+                onClick={handleRevoke}
+              >
+                {revokeShare.isPending ? "Revoking…" : "Revoke"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </main>
   );
 };
