@@ -20,7 +20,7 @@ export class FilesService {
     private readonly prisma: PrismaService,
     private readonly dataRoomsService: DataRoomsService,
     private readonly foldersService: FoldersService,
-    private readonly storageService: StorageService,
+    private readonly storage: StorageService,
   ) {}
 
   private async ensureNameAvailable(
@@ -68,9 +68,7 @@ export class FilesService {
   async getViewUrl(userId: string, fileId: string) {
     const file = await this.findOne(userId, fileId);
 
-    const viewUrl = await this.storageService.generateDownloadUrl(
-      file.storageKey,
-    );
+    const viewUrl = await this.storage.generateDownloadUrl(file.storageKey);
 
     return { viewUrl };
   }
@@ -115,10 +113,10 @@ export class FilesService {
     });
   }
 
-  async delete(userId: string, fileId: string) {
+  async remove(userId: string, fileId: string) {
     const file = await this.findOne(userId, fileId);
 
-    await this.storageService.deleteObject(file.storageKey);
+    await this.storage.deleteObject(file.storageKey);
 
     return this.prisma.file.delete({ where: { id: file.id } });
   }
@@ -136,7 +134,7 @@ export class FilesService {
 
     const storageKey = `data-rooms/${dto.dataRoomId}/files/${randomUUID()}.pdf`;
 
-    const uploadUrl = await this.storageService.generateUploadUrl(
+    const uploadUrl = await this.storage.generateUploadUrl(
       storageKey,
       dto.mimeType,
     );
@@ -169,7 +167,7 @@ export class FilesService {
 
     // Check if upload actually completed
     try {
-      metadata = await this.storageService.getObjectMetadata(dto.storageKey);
+      metadata = await this.storage.getObjectMetadata(dto.storageKey);
     } catch {
       throw new BadRequestException('Uploaded file not found in storage.');
     }

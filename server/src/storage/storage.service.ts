@@ -5,6 +5,7 @@ import {
   HeadObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -59,5 +60,25 @@ export class StorageService {
     });
 
     return this.s3.send(command);
+  }
+
+  async deleteObjects(keys: string[]): Promise<void> {
+    if (keys.length === 0) return;
+
+    for (let index = 0; index < keys.length; index += 1000) {
+      const chunk = keys.slice(index, index + 1000);
+      const command = new DeleteObjectsCommand({
+        Bucket: this.bucket,
+        Delete: {
+          Objects: chunk.map((key) => ({ Key: key })),
+        },
+      });
+
+      const response = await this.s3.send(command);
+
+      if (response.Errors?.length) {
+        throw new Error('Failed to delete some objects from S3.');
+      }
+    }
   }
 }

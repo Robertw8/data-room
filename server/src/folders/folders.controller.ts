@@ -41,6 +41,6 @@ export class FoldersController {
 
   @Delete(':id')
   delete(@Req() request: AuthenticatedRequest, @Param('id') folderId: string) {
-    return this.foldersService.delete(request.user!.sub, folderId);
+    return this.foldersService.remove(request.user!.sub, folderId);
   }
 }

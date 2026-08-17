@@ -25,6 +25,14 @@ export class DataRoomsController {
     return this.dataRoomsService.findAll(request.user!.sub);
   }
 
+  @Get(':dataRoomId/contents')
+  getRoomContents(
+    @Req() request: AuthenticatedRequest,
+    @Param('dataRoomId') roomId: string,
+  ) {
+    return this.dataRoomsService.findRoomContents(request.user!.sub, roomId);
+  }
+
   @Get(':dataRoomId/folders')
   getRoomFolders(
     @Req() request: AuthenticatedRequest,

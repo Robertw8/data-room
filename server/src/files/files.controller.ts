@@ -55,7 +55,7 @@ export class FilesController {
 
   @Delete(':id')
   delete(@Req() request: AuthenticatedRequest, @Param('id') fileId: string) {
-    return this.filesService.delete(request.user!.sub, fileId);
+    return this.filesService.remove(request.user!.sub, fileId);
   }
 
   @Post('upload-url')

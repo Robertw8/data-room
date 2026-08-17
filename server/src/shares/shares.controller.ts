@@ -23,6 +23,11 @@ export class SharesController {
     return this.sharesService.findReceived(request.user!.sub);
   }
 
+  @Get('created')
+  findCreated(@Req() request: AuthenticatedRequest) {
+    return this.sharesService.findCreated(request.user!.sub);
+  }
+
   @Get(':token/folders/:folderId')
   openFolder(
     @Req() request: AuthenticatedRequest,

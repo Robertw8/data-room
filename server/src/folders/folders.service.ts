@@ -3,13 +3,40 @@ import { PrismaService } from 'prisma/prisma.service';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { DataRoomsService } from 'src/data-rooms/data-rooms.service';
 import { UpdateFolderDto } from './dto/update-folder.dto';
+import { StorageService } from 'src/storage/storage.service';
 
 @Injectable()
 export class FoldersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly dataRoomsService: DataRoomsService,
+    private readonly storage: StorageService,
   ) {}
+
+  private async getSubtreeFolderIds(folderId: string, dataRoomId: string) {
+    const folderIds = [folderId];
+    const visited = new Set(folderIds);
+    let parentIds = [folderId];
+
+    while (parentIds.length > 0) {
+      const children = await this.prisma.folder.findMany({
+        where: {
+          dataRoomId,
+          parentId: { in: parentIds },
+        },
+        select: { id: true },
+      });
+      const childIds = children
+        .map((folder) => folder.id)
+        .filter((id) => !visited.has(id));
+
+      childIds.forEach((id) => visited.add(id));
+      folderIds.push(...childIds);
+      parentIds = childIds;
+    }
+
+    return folderIds;
+  }
 
   private async getBreadcrumbs(folderId: string, dataRoomId: string) {
     const breadcrumbs: { id: string; name: string }[] = [];
@@ -105,11 +132,24 @@ export class FoldersService {
     });
   }
 
-  async delete(userId: string, folderId: string) {
-    await this.findOne(userId, folderId);
+  async remove(userId: string, folderId: string) {
+    const targetFolder = await this.findOne(userId, folderId);
+    const subtreeFolderIds = await this.getSubtreeFolderIds(
+      targetFolder.id,
+      targetFolder.dataRoomId,
+    );
+    const files = await this.prisma.file.findMany({
+      where: {
+        dataRoomId: targetFolder.dataRoomId,
+        folderId: { in: subtreeFolderIds },
+      },
+      select: { storageKey: true },
+    });
+
+    await this.storage.deleteObjects(files.map((file) => file.storageKey));
 
     return this.prisma.folder.delete({
-      where: { id: folderId },
+      where: { id: targetFolder.id },
     });
   }
 }

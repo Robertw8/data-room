@@ -43,7 +43,7 @@ export class SharesService {
     private readonly dataRoomsService: DataRoomsService,
     private readonly foldersService: FoldersService,
     private readonly filesService: FilesService,
-    private readonly storageService: StorageService,
+    private readonly storage: StorageService,
   ) {}
 
   private shareSummary(share: ShareAccess) {
@@ -330,11 +330,59 @@ export class SharesService {
       throw new NotFoundException('Shared resource not found.');
     }
 
-    const viewUrl = await this.storageService.generateDownloadUrl(
-      file.storageKey,
-    );
+    const viewUrl = await this.storage.generateDownloadUrl(file.storageKey);
 
     return { viewUrl };
+  }
+
+  async findCreated(userId: string) {
+    return this.prisma.share.findMany({
+      where: {
+        createdById: userId,
+        revokedAt: null,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: {
+        id: true,
+        token: true,
+        type: true,
+        role: true,
+        recipientUserId: true,
+        recipientUser: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+        dataRoomId: true,
+        folderId: true,
+        fileId: true,
+        dataRoom: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        folder: {
+          select: {
+            id: true,
+            name: true,
+            dataRoomId: true,
+          },
+        },
+        file: {
+          select: {
+            id: true,
+            name: true,
+            dataRoomId: true,
+            folderId: true,
+          },
+        },
+        createdAt: true,
+      },
+    });
   }
 
   async findReceived(userId: string) {
