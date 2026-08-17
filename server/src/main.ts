@@ -6,10 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'https://data-room-production-6d31.up.railway.app/',
-    ],
+    origin: ['http://localhost:5173', 'https://data-room-cyan.vercel.app'],
     credentials: true,
   });
 
