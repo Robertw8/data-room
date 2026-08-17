@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   useAuth,
   useDataRoom,
@@ -22,6 +22,7 @@ import DeleteFileDialog from "@/components/files/DeleteFileDialog";
 import FileUpload from "@/components/files/FileUpload";
 import MoveFileDialog from "@/components/files/MoveFileDialog";
 import RenameFileDialog from "@/components/files/RenameFileDialog";
+import PdfViewerDialog from "@/components/files/PdfViewerDialog";
 import ShareDialog from "@/components/shares/ShareDialog";
 
 import getApiErrorMessage from "@/lib/api-error";
@@ -81,9 +82,9 @@ const FolderExplorer = ({
   const [fileToRename, setFileToRename] = useState<FolderFile | null>(null);
   const [fileToMove, setFileToMove] = useState<FolderFile | null>(null);
   const [fileToDelete, setFileToDelete] = useState<FolderFile | null>(null);
+  const [fileToView, setFileToView] = useState<FolderFile | null>(null);
   const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
-  const [fileActionError, setFileActionError] = useState<string | null>(null);
-  const viewFile = useFileViewUrl();
+  const { mutateAsync: getFileViewUrl } = useFileViewUrl();
   const dataRoom = useDataRoom(userId, dataRoomId);
   const rootContents = useDataRoomContents(
     userId,
@@ -114,33 +115,10 @@ const FolderExplorer = ({
     }
   };
 
-  const handleViewFile = async (file: FolderFile) => {
-    setFileActionError(null);
-
-    const viewTab = window.open("about:blank", "_blank");
-
-    if (!viewTab) {
-      setFileActionError(
-        "Unable to open a new tab. Please allow pop-ups and try again.",
-      );
-      return;
-    }
-
-    viewTab.opener = null;
-
-    try {
-      const { viewUrl } = await viewFile.mutateAsync(file.id);
-      viewTab.location.href = viewUrl;
-    } catch (requestError) {
-      viewTab.close();
-      setFileActionError(
-        getApiErrorMessage(
-          requestError,
-          "Unable to open this PDF. Please try again.",
-        ),
-      );
-    }
-  };
+  const loadViewUrl = useCallback(
+    async (fileId: string) => (await getFileViewUrl(fileId)).viewUrl,
+    [getFileViewUrl],
+  );
 
   const folders = folderId
     ? (folder.data?.children ?? [])
@@ -246,12 +224,6 @@ const FolderExplorer = ({
               userId={userId}
             />
 
-            {fileActionError && (
-              <p className="mb-4 text-sm text-destructive" role="alert">
-                {fileActionError}
-              </p>
-            )}
-
             {folders.length === 0 && files.length === 0 ? (
               <div className="rounded-xl border border-dashed bg-card p-12 text-center">
                 <FolderIcon className="mx-auto size-8 text-muted-foreground" />
@@ -289,7 +261,7 @@ const FolderExplorer = ({
                     <span className="hidden text-sm text-muted-foreground sm:block">
                       {formatDate(childFolder.updatedAt)}
                     </span>
-                    <div className="flex justify-end gap-1">
+                    <div className="flex flex-wrap justify-end gap-1">
                       <Button asChild size="sm" variant="ghost">
                         <Link
                           to={`/data-rooms/${dataRoomId}/folders/${childFolder.id}`}
@@ -347,14 +319,11 @@ const FolderExplorer = ({
                     </span>
                     <div className="flex flex-wrap justify-end gap-1">
                       <Button
-                        disabled={viewFile.isPending}
                         size="sm"
                         variant="ghost"
-                        onClick={() => void handleViewFile(file)}
+                        onClick={() => setFileToView(file)}
                       >
-                        {viewFile.isPending && viewFile.variables === file.id
-                          ? "Opening…"
-                          : "View"}
+                        View
                       </Button>
                       <Button
                         size="sm"
@@ -452,6 +421,15 @@ const FolderExplorer = ({
                 folderId={folderId}
                 userId={userId}
                 onClose={() => setFileToDelete(null)}
+              />
+            )}
+
+            {fileToView && (
+              <PdfViewerDialog
+                fileId={fileToView.id}
+                fileName={fileToView.name}
+                loadViewUrl={loadViewUrl}
+                onClose={() => setFileToView(null)}
               />
             )}
 

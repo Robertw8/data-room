@@ -99,7 +99,11 @@ const RenameFolderDialog = ({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button disabled={updateFolder.isPending} variant="outline">
+              <Button
+                disabled={updateFolder.isPending}
+                type="button"
+                variant="outline"
+              >
                 Cancel
               </Button>
             </DialogClose>

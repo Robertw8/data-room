@@ -7,17 +7,17 @@ async function bootstrap() {
 
   app.enableCors({
     origin: ['http://localhost:5173', 'https://data-room-cyan.vercel.app'],
-    credentials: true,
   });
-
-  await app.listen(process.env.PORT ?? 3000);
 
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
       whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
+
+  await app.listen(process.env.PORT ?? 3000);
 }
 
-bootstrap();
+void bootstrap();

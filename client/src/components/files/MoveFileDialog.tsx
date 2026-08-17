@@ -157,7 +157,11 @@ const MoveFileDialog = ({
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button disabled={moveFile.isPending} variant="outline">
+            <Button
+              disabled={moveFile.isPending}
+              type="button"
+              variant="outline"
+            >
               Cancel
             </Button>
           </DialogClose>

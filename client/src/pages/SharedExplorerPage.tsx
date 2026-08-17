@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronRightIcon, FileTextIcon, FolderIcon } from "lucide-react";
 import { useSharedFileViewUrl, useSharedResource } from "@/hooks";
 import { Button } from "@/components/ui/button";
+import PdfViewerDialog from "@/components/files/PdfViewerDialog";
 
 import type { FolderFile, SharedAccessMode } from "@/types";
 
@@ -19,39 +20,25 @@ interface SharedExplorerPageProps {
 
 const SharedExplorerPage = ({ mode }: SharedExplorerPageProps) => {
   const { token = "", folderId } = useParams();
-  const [fileActionError, setFileActionError] = useState<string | null>(null);
+  const [fileToView, setFileToView] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const resource = useSharedResource(mode, token, folderId ?? null);
-  const viewFile = useSharedFileViewUrl();
+  const { mutateAsync: getSharedFileViewUrl } = useSharedFileViewUrl();
   const routeBase = `/shared/${mode}/${token}`;
 
-  const handleViewFile = async (file: FolderFile | { id: string }) => {
-    setFileActionError(null);
-
-    const viewTab = window.open("about:blank", "_blank");
-
-    if (!viewTab) {
-      setFileActionError(
-        "Unable to open a new tab. Please allow pop-ups and try again.",
-      );
-      return;
-    }
-
-    viewTab.opener = null;
-
-    try {
-      const { viewUrl } = await viewFile.mutateAsync({
-        mode,
-        token,
-        fileId: file.id,
-      });
-      viewTab.location.href = viewUrl;
-    } catch {
-      viewTab.close();
-      setFileActionError(
-        "Unable to open this PDF. Access may have been revoked.",
-      );
-    }
-  };
+  const loadViewUrl = useCallback(
+    async (fileId: string) =>
+      (
+        await getSharedFileViewUrl({
+          mode,
+          token,
+          fileId,
+        })
+      ).viewUrl,
+    [getSharedFileViewUrl, mode, token],
+  );
 
   return (
     <main className="min-h-screen bg-muted/30">
@@ -126,12 +113,6 @@ const SharedExplorerPage = ({ mode }: SharedExplorerPageProps) => {
               </p>
             </div>
 
-            {fileActionError && (
-              <p className="mb-4 text-sm text-destructive" role="alert">
-                {fileActionError}
-              </p>
-            )}
-
             {resource.data.targetType === "FILE" && !resource.data.contents && (
               <section className="rounded-xl border bg-card p-6 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-4">
@@ -150,12 +131,14 @@ const SharedExplorerPage = ({ mode }: SharedExplorerPageProps) => {
                     </div>
                   </div>
                   <Button
-                    disabled={viewFile.isPending}
                     onClick={() =>
-                      void handleViewFile({ id: resource.data.item.id })
+                      setFileToView({
+                        id: resource.data.item.id,
+                        name: resource.data.item.name,
+                      })
                     }
                   >
-                    {viewFile.isPending ? "Opening…" : "View PDF"}
+                    View PDF
                   </Button>
                 </div>
               </section>
@@ -166,8 +149,16 @@ const SharedExplorerPage = ({ mode }: SharedExplorerPageProps) => {
                 files={resource.data.contents.files}
                 folders={resource.data.contents.folders}
                 routeBase={routeBase}
-                openingFileId={viewFile.variables?.fileId}
-                onViewFile={handleViewFile}
+                onViewFile={setFileToView}
+              />
+            )}
+
+            {fileToView && (
+              <PdfViewerDialog
+                fileId={fileToView.id}
+                fileName={fileToView.name}
+                loadViewUrl={loadViewUrl}
+                onClose={() => setFileToView(null)}
               />
             )}
           </>
@@ -181,15 +172,13 @@ interface SharedDirectoryProps {
   files: FolderFile[];
   folders: Array<{ id: string; name: string }>;
   routeBase: string;
-  openingFileId?: string;
-  onViewFile: (file: FolderFile) => Promise<void>;
+  onViewFile: (file: FolderFile) => void;
 }
 
 const SharedDirectory = ({
   files,
   folders,
   routeBase,
-  openingFileId,
   onViewFile,
 }: SharedDirectoryProps) => {
   if (folders.length === 0 && files.length === 0) {
@@ -235,13 +224,8 @@ const SharedDirectory = ({
               </p>
             </div>
           </div>
-          <Button
-            disabled={Boolean(openingFileId)}
-            size="sm"
-            variant="ghost"
-            onClick={() => void onViewFile(file)}
-          >
-            {openingFileId === file.id ? "Opening…" : "View PDF"}
+          <Button size="sm" variant="ghost" onClick={() => onViewFile(file)}>
+            View PDF
           </Button>
         </div>
       ))}

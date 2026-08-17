@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- shadcn variants are shared by alert-dialog */
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Slot } from "radix-ui";

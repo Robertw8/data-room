@@ -8,6 +8,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { hash, compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -27,10 +28,23 @@ export class AuthService {
 
     const passwordHash = await hash(dto.password, 12);
 
-    const createdUser = await this.prisma.user.create({
-      data: { email: dto.email, passwordHash },
-      omit: { passwordHash: true },
-    });
+    let createdUser: { id: string; email: string };
+
+    try {
+      createdUser = await this.prisma.user.create({
+        data: { email: dto.email, passwordHash },
+        omit: { passwordHash: true },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('User with this email already exists');
+      }
+
+      throw error;
+    }
 
     // Returning access token after registration unless we'd have email confirmation
     const accessToken = await this.generateAccessToken(createdUser);

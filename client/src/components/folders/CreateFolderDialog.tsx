@@ -108,7 +108,11 @@ const CreateFolderDialog = ({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button disabled={createFolder.isPending} variant="outline">
+              <Button
+                disabled={createFolder.isPending}
+                type="button"
+                variant="outline"
+              >
                 Cancel
               </Button>
             </DialogClose>

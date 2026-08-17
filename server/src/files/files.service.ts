@@ -13,6 +13,7 @@ import { CompleteUploadDto } from './dto/complete-upload.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { MoveFileDto } from './dto/move-file.dto';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class FilesService {
@@ -43,6 +44,23 @@ export class FilesService {
       throw new ConflictException(
         'A file with this name already exists in this folder.',
       );
+    }
+  }
+
+  private async saveFile<T>(operation: () => Promise<T>) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          'A file with this name already exists in this folder.',
+        );
+      }
+
+      throw error;
     }
   }
 
@@ -83,10 +101,12 @@ export class FilesService {
       file.id,
     );
 
-    return this.prisma.file.update({
-      where: { id: file.id },
-      data: { name: dto.name },
-    });
+    return this.saveFile(() =>
+      this.prisma.file.update({
+        where: { id: file.id },
+        data: { name: dto.name },
+      }),
+    );
   }
 
   async move(userId: string, fileId: string, dto: MoveFileDto) {
@@ -107,10 +127,12 @@ export class FilesService {
       file.id,
     );
 
-    return this.prisma.file.update({
-      where: { id: file.id },
-      data: { folderId: dto.folderId },
-    });
+    return this.saveFile(() =>
+      this.prisma.file.update({
+        where: { id: file.id },
+        data: { folderId: dto.folderId },
+      }),
+    );
   }
 
   async remove(userId: string, fileId: string) {
@@ -172,7 +194,9 @@ export class FilesService {
       throw new BadRequestException('Uploaded file not found in storage.');
     }
 
-    if (metadata.ContentType !== 'application/pdf') {
+    const mimeType = metadata.ContentType;
+
+    if (mimeType !== 'application/pdf') {
       throw new BadRequestException('Only PDF files are allowed.');
     }
 
@@ -199,15 +223,17 @@ export class FilesService {
       dto.folderId ?? null,
     );
 
-    return this.prisma.file.create({
-      data: {
-        name: dto.name,
-        storageKey: dto.storageKey,
-        mimeType: metadata.ContentType,
-        size,
-        dataRoomId: dto.dataRoomId,
-        folderId: dto.folderId,
-      },
-    });
+    return this.saveFile(() =>
+      this.prisma.file.create({
+        data: {
+          name: dto.name,
+          storageKey: dto.storageKey,
+          mimeType,
+          size,
+          dataRoomId: dto.dataRoomId,
+          folderId: dto.folderId,
+        },
+      }),
+    );
   }
 }

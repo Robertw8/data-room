@@ -100,7 +100,11 @@ const CreateDataRoomDialog = ({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button disabled={createDataRoom.isPending} variant="outline">
+              <Button
+                disabled={createDataRoom.isPending}
+                type="button"
+                variant="outline"
+              >
                 Cancel
               </Button>
             </DialogClose>

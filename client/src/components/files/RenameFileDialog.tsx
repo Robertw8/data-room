@@ -99,7 +99,11 @@ const RenameFileDialog = ({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button disabled={renameFile.isPending} variant="outline">
+              <Button
+                disabled={renameFile.isPending}
+                type="button"
+                variant="outline"
+              >
                 Cancel
               </Button>
             </DialogClose>

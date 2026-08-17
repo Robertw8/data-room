@@ -95,7 +95,11 @@ const RenameDataRoomDialog = ({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button disabled={updateDataRoom.isPending} variant="outline">
+              <Button
+                disabled={updateDataRoom.isPending}
+                type="button"
+                variant="outline"
+              >
                 Cancel
               </Button>
             </DialogClose>

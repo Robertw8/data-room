@@ -1,8 +1,15 @@
-import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  MinLength,
+} from 'class-validator';
 
 export class CreateFolderDto {
   @IsString()
   @MinLength(1)
+  @Matches(/\S/, { message: 'name must not be blank' })
   name!: string;
 
   @IsUUID()
