@@ -14,11 +14,7 @@ import { getDirectoryQueryKey } from "@/hooks";
 import getApiErrorMessage from "@/lib/api-error";
 
 type UploadStatus =
-  | "pending"
-  | "uploading"
-  | "completing"
-  | "success"
-  | "error";
+  "pending" | "uploading" | "completing" | "success" | "error";
 
 interface UploadItem {
   id: string;
@@ -56,7 +52,11 @@ const FileUpload = ({ dataRoomId, folderId, userId }: FileUploadProps) => {
   };
 
   const runUpload = async (item: UploadItem) => {
-    updateUpload(item.id, { status: "uploading" });
+    updateUpload(item.id, {
+      progress: 0,
+      status: "uploading",
+      error: undefined,
+    });
 
     try {
       await uploadFile({
@@ -208,7 +208,19 @@ const FileUpload = ({ dataRoomId, folderId, userId }: FileUploadProps) => {
 
               <div className="mt-1 flex justify-between gap-3 text-xs text-muted-foreground">
                 <span>{item.error ?? ""}</span>
-                <span>{item.progress}%</span>
+                <div className="flex shrink-0 items-center gap-2">
+                  {item.status === "error" && (
+                    <Button
+                      size="xs"
+                      type="button"
+                      variant="ghost"
+                      onClick={() => void runUpload(item)}
+                    >
+                      Retry
+                    </Button>
+                  )}
+                  <span>{item.progress}%</span>
+                </div>
               </div>
             </div>
           ))}

@@ -1,6 +1,7 @@
 import api from "./api-client";
 import type {
   CreateFolderInput,
+  DeletionStats,
   Folder,
   FolderDetail,
   UpdateFolderInput,
@@ -14,6 +15,14 @@ const getRootFolders = async (dataRoomId: string): Promise<Folder[]> => {
 
 const getFolder = async (id: string): Promise<FolderDetail> => {
   const response = await api.get<FolderDetail>(`/folders/${id}`);
+
+  return response.data;
+};
+
+const getFolderDeletionStats = async (id: string): Promise<DeletionStats> => {
+  const response = await api.get<DeletionStats>(
+    `/folders/${id}/deletion-stats`,
+  );
 
   return response.data;
 };
@@ -39,4 +48,11 @@ const deleteFolder = async (id: string): Promise<Folder> => {
   return response.data;
 };
 
-export { createFolder, deleteFolder, getFolder, getRootFolders, updateFolder };
+export {
+  createFolder,
+  deleteFolder,
+  getFolder,
+  getFolderDeletionStats,
+  getRootFolders,
+  updateFolder,
+};

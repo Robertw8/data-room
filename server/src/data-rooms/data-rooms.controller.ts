@@ -41,6 +41,14 @@ export class DataRoomsController {
     return this.dataRoomsService.findRoomFolders(request.user!.sub, roomId);
   }
 
+  @Get(':id/deletion-stats')
+  getDeletionStats(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') roomId: string,
+  ) {
+    return this.dataRoomsService.getDeletionStats(request.user!.sub, roomId);
+  }
+
   @Get(':id')
   getOne(@Req() request: AuthenticatedRequest, @Param('id') roomId: string) {
     return this.dataRoomsService.findOne(request.user!.sub, roomId);

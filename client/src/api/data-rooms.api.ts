@@ -1,5 +1,10 @@
 import api from "./api-client";
-import type { DataRoom, DataRoomContents, DataRoomInput } from "@/types";
+import type {
+  DataRoom,
+  DataRoomContents,
+  DataRoomInput,
+  DeletionStats,
+} from "@/types";
 
 const getDataRooms = async (): Promise<DataRoom[]> => {
   const response = await api.get<DataRoom[]>("/data-rooms");
@@ -16,6 +21,14 @@ const getDataRoom = async (id: string): Promise<DataRoom> => {
 const getDataRoomContents = async (id: string): Promise<DataRoomContents> => {
   const response = await api.get<DataRoomContents>(
     `/data-rooms/${id}/contents`,
+  );
+
+  return response.data;
+};
+
+const getDataRoomDeletionStats = async (id: string): Promise<DeletionStats> => {
+  const response = await api.get<DeletionStats>(
+    `/data-rooms/${id}/deletion-stats`,
   );
 
   return response.data;
@@ -47,6 +60,7 @@ export {
   deleteDataRoom,
   getDataRoom,
   getDataRoomContents,
+  getDataRoomDeletionStats,
   getDataRooms,
   updateDataRoom,
 };

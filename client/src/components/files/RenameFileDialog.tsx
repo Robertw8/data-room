@@ -107,7 +107,11 @@ const RenameFileDialog = ({
                 Cancel
               </Button>
             </DialogClose>
-            <Button disabled={renameFile.isPending} type="submit">
+            <Button
+              className="min-w-28"
+              disabled={renameFile.isPending}
+              type="submit"
+            >
               {renameFile.isPending ? "Saving…" : "Save changes"}
             </Button>
           </DialogFooter>

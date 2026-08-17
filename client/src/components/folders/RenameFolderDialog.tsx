@@ -107,7 +107,11 @@ const RenameFolderDialog = ({
                 Cancel
               </Button>
             </DialogClose>
-            <Button disabled={updateFolder.isPending} type="submit">
+            <Button
+              className="min-w-28"
+              disabled={updateFolder.isPending}
+              type="submit"
+            >
               {updateFolder.isPending ? "Saving…" : "Save changes"}
             </Button>
           </DialogFooter>

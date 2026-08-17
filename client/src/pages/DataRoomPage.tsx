@@ -25,7 +25,6 @@ import RenameFileDialog from "@/components/files/RenameFileDialog";
 import PdfViewerDialog from "@/components/files/PdfViewerDialog";
 import ShareDialog from "@/components/shares/ShareDialog";
 
-import getApiErrorMessage from "@/lib/api-error";
 import type { Folder, FolderFile, ShareTargetType } from "@/types";
 
 interface ShareTarget {
@@ -97,7 +96,6 @@ const FolderExplorer = ({
     ? folder.isPending
     : rootContents.isPending;
   const directoryIsError = folderId ? folder.isError : rootContents.isError;
-  const directoryError = folderId ? folder.error : rootContents.error;
   const folderDoesNotBelongToRoom =
     folderId !== null &&
     folder.isSuccess &&
@@ -155,19 +153,30 @@ const FolderExplorer = ({
 
         {hasLoadError && (
           <div className="rounded-xl border border-destructive/30 bg-card p-8 text-center">
-            <p className="text-sm text-destructive" role="alert">
-              {folderDoesNotBelongToRoom
-                ? "This folder does not belong to the selected Data Room."
-                : getApiErrorMessage(
-                    dataRoom.error ?? directoryError,
-                    "Unable to load this folder. Please try again.",
-                  )}
+            <h1 className="text-lg font-semibold" role="alert">
+              This resource is no longer available.
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              It may have been deleted or your access may have changed.
             </p>
-            {!folderDoesNotBelongToRoom && (
-              <Button className="mt-4" variant="outline" onClick={handleRetry}>
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <Button asChild variant="outline">
+                <Link
+                  to={
+                    folderId && !dataRoom.isError
+                      ? `/data-rooms/${dataRoomId}`
+                      : "/app"
+                  }
+                >
+                  {folderId && !dataRoom.isError
+                    ? "Back to Data Room"
+                    : "Back to Data Rooms"}
+                </Link>
+              </Button>
+              <Button variant="outline" onClick={handleRetry}>
                 Try again
               </Button>
-            )}
+            </div>
           </div>
         )}
 

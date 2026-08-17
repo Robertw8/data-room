@@ -3,6 +3,7 @@ import {
   createFolder,
   deleteFolder,
   getFolder,
+  getFolderDeletionStats,
   getDataRoomContents,
   updateFolder,
 } from "@/api";
@@ -32,6 +33,14 @@ const useFolder = (userId: string, folderId: string, enabled = true) =>
     queryKey: folderKeys.detail(userId, folderId),
     queryFn: () => getFolder(folderId),
     enabled: enabled && Boolean(folderId),
+  });
+
+const useFolderDeletionStats = (userId: string, folderId: string) =>
+  useQuery({
+    queryKey: [...folderKeys.detail(userId, folderId), "deletion-stats"],
+    queryFn: () => getFolderDeletionStats(folderId),
+    enabled: Boolean(folderId),
+    retry: false,
   });
 
 const useCreateFolder = (
@@ -117,5 +126,6 @@ export {
   useDeleteFolder,
   useDataRoomContents,
   useFolder,
+  useFolderDeletionStats,
   useUpdateFolder,
 };

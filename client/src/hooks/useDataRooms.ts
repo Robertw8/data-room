@@ -3,6 +3,7 @@ import {
   createDataRoom,
   deleteDataRoom,
   getDataRoom,
+  getDataRoomDeletionStats,
   getDataRooms,
   updateDataRoom,
 } from "@/api";
@@ -26,6 +27,14 @@ const useDataRoom = (userId: string, id: string) =>
     queryKey: dataRoomKeys.detail(userId, id),
     queryFn: () => getDataRoom(id),
     enabled: Boolean(id),
+  });
+
+const useDataRoomDeletionStats = (userId: string, id: string) =>
+  useQuery({
+    queryKey: [...dataRoomKeys.detail(userId, id), "deletion-stats"],
+    queryFn: () => getDataRoomDeletionStats(id),
+    enabled: Boolean(id),
+    retry: false,
   });
 
 const useCreateDataRoom = (userId: string) => {
@@ -78,6 +87,7 @@ export {
   dataRoomKeys,
   useCreateDataRoom,
   useDataRoom,
+  useDataRoomDeletionStats,
   useDataRooms,
   useDeleteDataRoom,
   useUpdateDataRoom,

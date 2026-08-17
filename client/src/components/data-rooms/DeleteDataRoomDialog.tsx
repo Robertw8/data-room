@@ -1,5 +1,5 @@
 import { useState, type MouseEvent } from "react";
-import { useDeleteDataRoom } from "@/hooks";
+import { useDataRoomDeletionStats, useDeleteDataRoom } from "@/hooks";
 
 import {
   AlertDialog,
@@ -15,6 +15,13 @@ import {
 import getApiErrorMessage from "@/lib/api-error";
 import type { DataRoom } from "@/types";
 
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 interface DeleteDataRoomDialogProps {
   dataRoom: DataRoom;
   userId: string;
@@ -27,6 +34,7 @@ const DeleteDataRoomDialog = ({
   onClose,
 }: DeleteDataRoomDialogProps) => {
   const deleteDataRoom = useDeleteDataRoom(userId);
+  const stats = useDataRoomDeletionStats(userId, dataRoom.id);
   const [error, setError] = useState<string | null>(null);
 
   const handleOpenChange = (open: boolean) => {
@@ -55,9 +63,12 @@ const DeleteDataRoomDialog = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete “{dataRoom.name}”?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Deleting this Data Room will permanently delete all nested folders
-            and files. This action cannot be undone.
+          <AlertDialogDescription className="min-h-10">
+            {stats.isPending && "Calculating what will be deleted…"}
+            {stats.isError &&
+              "All nested folders and files will be permanently deleted. This action cannot be undone."}
+            {stats.isSuccess &&
+              `This will permanently delete ${stats.data.folderCount} ${stats.data.folderCount === 1 ? "folder" : "folders"} and ${stats.data.fileCount} ${stats.data.fileCount === 1 ? "file" : "files"} (${formatFileSize(stats.data.totalSize)}).`}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -72,7 +83,7 @@ const DeleteDataRoomDialog = ({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-white hover:bg-destructive/90"
+            className="min-w-32 bg-destructive text-white hover:bg-destructive/90"
             disabled={deleteDataRoom.isPending}
             onClick={handleDelete}
           >

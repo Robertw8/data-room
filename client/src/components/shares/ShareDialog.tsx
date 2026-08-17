@@ -204,6 +204,7 @@ const ShareDialog = ({
               </Button>
             </DialogClose>
             <Button
+              className="min-w-40"
               disabled={
                 createShare.isPending || Boolean(publicUrl) || Boolean(success)
               }

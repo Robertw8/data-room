@@ -66,11 +66,21 @@ const SharedExplorerPage = ({ mode }: SharedExplorerPageProps) => {
         {resource.isError && (
           <div className="rounded-xl border border-destructive/30 bg-card p-10 text-center">
             <h1 className="text-lg font-semibold">
-              Shared resource unavailable
+              This resource is no longer available.
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              This shared resource is unavailable or access has been revoked.
+              It may have been deleted or your access may have changed.
             </p>
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <Button asChild variant="outline">
+                <Link to={mode === "user" ? "/shares/received" : "/"}>
+                  {mode === "user" ? "Back to Shared with me" : "Go to home"}
+                </Link>
+              </Button>
+              <Button variant="outline" onClick={() => void resource.refetch()}>
+                Try again
+              </Button>
+            </div>
           </div>
         )}
 

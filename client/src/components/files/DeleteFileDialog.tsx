@@ -75,7 +75,7 @@ const DeleteFileDialog = ({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-white hover:bg-destructive/90"
+            className="min-w-24 bg-destructive text-white hover:bg-destructive/90"
             disabled={deleteFile.isPending}
             onClick={handleDelete}
           >

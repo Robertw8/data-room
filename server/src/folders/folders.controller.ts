@@ -20,6 +20,14 @@ import { UpdateFolderDto } from './dto/update-folder.dto';
 export class FoldersController {
   constructor(private readonly foldersService: FoldersService) {}
 
+  @Get(':id/deletion-stats')
+  getDeletionStats(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') folderId: string,
+  ) {
+    return this.foldersService.getDeletionStats(request.user!.sub, folderId);
+  }
+
   @Get(':id')
   getOne(@Req() request: AuthenticatedRequest, @Param('id') folderId: string) {
     return this.foldersService.findOne(request.user!.sub, folderId);

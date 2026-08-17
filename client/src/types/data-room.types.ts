@@ -9,3 +9,9 @@ export interface DataRoom {
 export interface DataRoomInput {
   name: string;
 }
+
+export interface DeletionStats {
+  folderCount: number;
+  fileCount: number;
+  totalSize: number;
+}

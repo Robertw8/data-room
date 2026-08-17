@@ -103,7 +103,11 @@ const RenameDataRoomDialog = ({
                 Cancel
               </Button>
             </DialogClose>
-            <Button disabled={updateDataRoom.isPending} type="submit">
+            <Button
+              className="min-w-28"
+              disabled={updateDataRoom.isPending}
+              type="submit"
+            >
               {updateDataRoom.isPending ? "Saving…" : "Save changes"}
             </Button>
           </DialogFooter>

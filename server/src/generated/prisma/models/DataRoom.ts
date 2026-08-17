@@ -202,6 +202,7 @@ export type DataRoomOrderByWithRelationInput = {
 
 export type DataRoomWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  ownerId_name?: Prisma.DataRoomOwnerIdNameCompoundUniqueInput
   AND?: Prisma.DataRoomWhereInput | Prisma.DataRoomWhereInput[]
   OR?: Prisma.DataRoomWhereInput[]
   NOT?: Prisma.DataRoomWhereInput | Prisma.DataRoomWhereInput[]
@@ -213,7 +214,7 @@ export type DataRoomWhereUniqueInput = Prisma.AtLeast<{
   folders?: Prisma.FolderListRelationFilter
   files?: Prisma.FileListRelationFilter
   shares?: Prisma.ShareListRelationFilter
-}, "id">
+}, "id" | "ownerId_name">
 
 export type DataRoomOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -312,6 +313,11 @@ export type DataRoomListRelationFilter = {
 
 export type DataRoomOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type DataRoomOwnerIdNameCompoundUniqueInput = {
+  ownerId: string
+  name: string
 }
 
 export type DataRoomCountOrderByAggregateInput = {

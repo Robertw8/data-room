@@ -1,5 +1,5 @@
 import { useState, type MouseEvent } from "react";
-import { useDeleteFolder } from "@/hooks";
+import { useDeleteFolder, useFolderDeletionStats } from "@/hooks";
 
 import {
   AlertDialog,
@@ -14,6 +14,13 @@ import {
 
 import getApiErrorMessage from "@/lib/api-error";
 import type { Folder } from "@/types";
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
 
 interface DeleteFolderDialogProps {
   currentFolderId: string | null;
@@ -31,6 +38,7 @@ const DeleteFolderDialog = ({
   onClose,
 }: DeleteFolderDialogProps) => {
   const deleteFolder = useDeleteFolder(userId, dataRoomId, currentFolderId);
+  const stats = useFolderDeletionStats(userId, folder.id);
   const [error, setError] = useState<string | null>(null);
 
   const handleOpenChange = (open: boolean) => {
@@ -59,9 +67,12 @@ const DeleteFolderDialog = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete “{folder.name}”?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Deleting this folder will permanently delete all nested folders and
-            files. This action cannot be undone.
+          <AlertDialogDescription className="min-h-10">
+            {stats.isPending && "Calculating what will be deleted…"}
+            {stats.isError &&
+              "All nested folders and files will be permanently deleted. This action cannot be undone."}
+            {stats.isSuccess &&
+              `This will permanently delete ${stats.data.folderCount} ${stats.data.folderCount === 1 ? "folder" : "folders"} and ${stats.data.fileCount} ${stats.data.fileCount === 1 ? "file" : "files"} (${formatFileSize(stats.data.totalSize)}).`}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -76,7 +87,7 @@ const DeleteFolderDialog = ({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-white hover:bg-destructive/90"
+            className="min-w-28 bg-destructive text-white hover:bg-destructive/90"
             disabled={deleteFolder.isPending}
             onClick={handleDelete}
           >
