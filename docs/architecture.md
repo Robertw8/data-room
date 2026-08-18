@@ -91,7 +91,7 @@ sequenceDiagram
     Files->>S3: Create 5-minute presigned PUT
     Files-->>UI: uploadUrl and storageKey
     UI->>S3: PUT PDF with Content-Type application/pdf
-    Note over UI,S3: Plain Axios request; no application Bearer token
+    Note over UI,S3: Plain Axios request without application Bearer token
     S3-->>UI: PUT result
     UI->>Files: POST /files/complete<br/>name, storageKey, room, optional folder
     Files->>DB: Recheck owner and destination
